@@ -1,4 +1,4 @@
-# 모닥불
+# 모닥불 서비스 소개
 
 모닥불은 비를 맞거나 바람이 세면 약해집니다. 캠핑도 마찬가지입니다.
 비가 오거나 바람이 강한 날은 장비를 아무리 챙겨도 즐기기 어렵습니다.
@@ -7,13 +7,8 @@
 오늘 어느 지역이 캠핑하기 좋은지, 그 날씨에는 어떤 방식이 맞는지, 조건에 맞는 야영장은 어디인지까지
 캠퍼에게 알려 주는 서비스입니다.
 
-https://skala-vue-three-navy.vercel.app
 
-강의 Hands on 9개를 차례로 실습하고, 그 실습본을 버리지 않고 이어 붙여 만들었습니다.
-단계마다 무엇을 만들었는지, 그게 최종 서비스에 남았는지, 요구사항 밖에서 따로 더한 것,
-그리고 막혔던 것을 적었습니다.
-
-## Hands on 1 — Project Scaffolding
+## 프로젝트 생성 — Project Scaffolding
 
 ### 구현 내용
 
@@ -35,7 +30,7 @@ https://skala-vue-three-navy.vercel.app
 
 없었습니다.
 
-## Hands on 2 — Weather Mockup
+## 과제1 — Weather Mockup
 
 ### 구현 내용
 
@@ -46,11 +41,11 @@ https://skala-vue-three-navy.vercel.app
 
 ### 최종 서비스 적용 여부
 
-목업 배열은 Hands on 7 에서 API 응답으로 전부 교체됐고, 좌표만 `data/cityList.js` 에 남았습니다.
+목업 배열은 과제6 에서 API 응답으로 전부 교체됐고, 좌표만 `data/cityList.js` 에 남았습니다.
 3곳이던 목록은 전국 17개 시도가 됐습니다.
 
 `@click.stop` 은 야영장 카드의 찜 하트에 그대로 있습니다. 하트를 눌렀을 때 상세가 같이 열리면 안 되니까요.
-`window.alert` 상세는 Hands on 5 에서 `router.push` 로 바뀌었습니다.
+`window.alert` 상세는 과제4 에서 `router.push` 로 바뀌었습니다.
 
 목업으로 목록을 만드는 방식 자체는 커뮤니티(셰르파 동행, 장비 중고거래) 두 화면으로 넓혔습니다.
 글과 신청이 오가려면 서버가 있어야 하는데 프런트만 만드는 과제라 화면까지만 만들고
@@ -80,7 +75,7 @@ https://skala-vue-three-navy.vercel.app
 뒤에야 들어왔습니다. 한글은 조합 중에도 input 이벤트가 도는데 `v-model` 은 완성된 글자만
 올려 보냅니다. `:value` + `@input` 으로 바꿔 해결했습니다.
 
-## Hands on 3 — Weather Composition
+## 과제2 — Weather Composition
 
 ### 구현 내용
 
@@ -127,7 +122,7 @@ Vue 밖의 것을 붙이고 떼는 자리에 씁니다.
 함수가 받은 건 배열이었습니다. 함수 안의 `.value` 대입이 원본에 닿지 않았던 것입니다.
 어느 묶음인지를 문자열로 받게 고쳤습니다.
 
-## Hands on 4 — Weather Component
+## 과제3 — Weather Component
 
 ### 구현 내용
 
@@ -162,7 +157,7 @@ Vue 밖의 것을 붙이고 떼는 자리에 씁니다.
 3. 주간 그래프 폭이 안 따라왔습니다. `:key` 로 지역을 바꾸면 덩어리가 새로 만들어지는데
    ResizeObserver 를 `onMounted` 에서 한 번만 걸어 떨어져 나간 옛 요소를 보고 있었습니다
 
-## Hands on 5 — Weather Router
+## 과제4 — Weather Router
 
 ### 구현 내용
 
@@ -192,7 +187,7 @@ Vue 밖의 것을 붙이고 떼는 자리에 씁니다.
 첫 화면에서 스크롤을 가로채는 처리를 넣었더니 다른 화면으로 넘어가도 잠긴 채 남았습니다.
 SPA 는 페이지를 새로 받지 않으니 `onBeforeUnmount` 에서 직접 풀어야 합니다.
 
-## Hands on 6 — Weather Store
+## 과제5 — Weather Store
 
 ### 구현 내용
 
@@ -228,7 +223,7 @@ SPA 는 페이지를 새로 받지 않으니 `onBeforeUnmount` 에서 직접 풀
 id(`city_02`)가 남아 있었고 그 사이 체계가 `sido_11` 로 바뀌어 있었습니다. 배지는 개수만 세고
 화면은 그 지역을 못 찾은 것입니다. 불러올 때 없는 id 를 걸러내도록 고쳤습니다.
 
-## Hands on 7 — Weather Axios
+## 과제6 — Weather Axios
 
 ### 구현 내용
 
@@ -283,7 +278,7 @@ id(`city_02`)가 남아 있었고 그 사이 체계가 `sido_11` 로 바뀌어 �
    걸립니다. 좌표별 캐시와 320ms 디바운스를 넣고, 429 를 잠깐 몰린 것과 하루치가 끝난 것으로
    갈라 앞의 경우만 재시도하게 했습니다
 
-## Hands on 8 — Weather UI Library
+## 과제7 — Weather UI Library
 
 ### 구현 내용
 
@@ -315,7 +310,7 @@ Button, BackTop, ConfigProvider 입니다. `theme.js` 도 그대로입니다.
 3. `mix-blend-mode: screen` 을 안쪽 요소에 걸었더니 부모가 `z-index` 로 만든 쌓임 맥락에 갇혔습니다
 4. 전면 배너를 만들며 `overflow-x: clip` 을 본문에 걸었더니 배너가 잘렸습니다. `html` 에 걸어야 합니다
 
-## Hands on 9 — Weather Deployment
+## 과제8 — Weather Deployment
 
 ### 구현 내용
 
