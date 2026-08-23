@@ -54,6 +54,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: withKey(/^\/api\/owm/, 'appid', owm),
         },
+        // 키는 없지만 외부 도메인을 브라우저가 직접 물지 않게 함께 지난다
+        '/api/meteo': {
+          target: 'https://api.open-meteo.com/v1',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/meteo/, ''),
+        },
         // 공공데이터포털은 CORS 헤더를 주지 않아 브라우저에서 직접 못 부른다
         '/api/gocamping': {
           target: 'https://apis.data.go.kr/B551011/GoCamping',

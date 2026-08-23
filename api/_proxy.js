@@ -1,15 +1,17 @@
 /*
  * 브라우저 대신 서버가 API 를 부른다.
  *
- * 키를 클라이언트 번들에 넣으면 개발자 도구에서 그대로 보인다.
- * 저장소가 공개라 더 그렇다. 그래서 키는 Vercel 환경변수에만 두고
- * (VITE_ 접두사를 붙이지 않아야 번들에 안 들어간다) 여기서 붙인다.
+ * 두 가지를 여기서 해결한다.
+ *   1. 인증키를 브라우저에 내려보내지 않는다. VITE_ 접두사를 붙이면 번들에 박혀
+ *      개발자 도구에서 그대로 보인다. 저장소가 공개라 더 그렇다.
+ *   2. 외부 도메인을 브라우저가 직접 물지 않게 한다. 회사나 학교 망에서 특정
+ *      도메인이 막히면 그 화면만 통째로 죽는다. 키가 필요 없는 API 도 여기를 지난다.
  *
  * 원본 경로는 vercel.json 의 rewrite 가 ?path= 로 실어 보낸다.
  * 폴더 이름에 [...] 를 쓰는 캐치올은 한 칸짜리 경로만 잡혀서 쓰지 않는다.
  */
 export async function proxy(req, res, { base, keyName, keyValue, what }) {
-  if (!keyValue) {
+  if (keyName && !keyValue) {
     res.status(500).json({ message: `${what} 인증키가 서버에 설정되지 않았습니다.` })
     return
   }
@@ -21,7 +23,7 @@ export async function proxy(req, res, { base, keyName, keyValue, what }) {
     if (name === 'path') continue
     url.searchParams.set(name, value)
   }
-  url.searchParams.set(keyName, keyValue)
+  if (keyName) url.searchParams.set(keyName, keyValue)
 
   try {
     const upstream = await fetch(url, { headers: { accept: '*/*' } })

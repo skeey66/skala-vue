@@ -13,7 +13,7 @@ import { attachRetry } from './retry'
  * 도시 10곳을 1콜로 끝낼 수 있어 호출 수를 크게 줄인다. 키도 필요 없다.
  */
 const openMeteo = axios.create({
-  baseURL: 'https://api.open-meteo.com/v1',
+  baseURL: '/api/meteo',
   timeout: 8000,
 })
 

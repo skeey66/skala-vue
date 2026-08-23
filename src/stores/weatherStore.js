@@ -49,6 +49,9 @@ export const useWeatherStore = defineStore('weather', {
     error: null,
     loadedAt: 0,
 
+    // 예보를 못 받으면 밤 기온과 강수확률이 비어 점수가 낮게 잡힌다
+    outlookMissing: false,
+
     // Geocoding 으로 찾아서 목록에 더한 지역. 기본 10곳 뒤에 붙는다.
     extraPlaces: loadExtraPlaces(),
     searching: false,
@@ -110,8 +113,7 @@ export const useWeatherStore = defineStore('weather', {
       if (!force && this.cities.length && !this.isStale) return
 
       if (!hasOpenWeatherKey()) {
-        this.error =
-          'OpenWeatherMap API 키가 없습니다. .env 의 VITE_OPENWEATHER_API_KEY 를 확인하세요.'
+        this.error = 'OpenWeatherMap API 키가 서버에 설정되지 않았습니다.'
         return
       }
 
@@ -121,14 +123,24 @@ export const useWeatherStore = defineStore('weather', {
       const targets = this.targets
 
       try {
+        /*
+         * 예보(Open-Meteo)는 없어도 화면을 띄운다.
+         * Promise.all 은 하나만 거부돼도 전부 거부해서, 예보가 막힌 망에서는
+         * 지수가 하나도 안 나왔다. 관측값만이라도 보여주는 쪽이 낫다.
+         */
         const [currents, airs, outlooks] = await Promise.all([
           Promise.all(targets.map((city) => fetchCurrentWeather(city))),
           Promise.all(targets.map((city) => fetchAirPollution(city))),
-          fetchDailyOutlook(targets),
+          fetchDailyOutlook(targets).catch((error) => {
+            console.error('[weatherStore] 예보를 받지 못했습니다', error)
+            return null
+          }),
         ])
 
+        this.outlookMissing = !outlooks
+
         this.cities = targets.map((city, index) => {
-          const { cityId, ...outlook } = outlooks[index]
+          const { cityId, ...outlook } = outlooks?.[index] ?? {}
           const air = airs[index]
           return {
             ...city,
