@@ -1,22 +1,225 @@
-@import './base.css';
+/* 본문: Pretendard (한글), 계측값: JetBrains Mono (숫자) */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  font-weight: normal;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-a,
-.green {
+/*
+ * 사진 배너가 본문 폭 밖으로 나가 화면 끝까지 채운다(100vw).
+ * 세로 스크롤바 폭만큼 넘칠 수 있어 가로만 잘라 낸다.
+ * clip 은 hidden 과 달리 스크롤 상자를 만들지 않아 붙박이(sticky)가 안 깨진다.
+ * .page 에 걸면 배너가 본문 폭에서 잘려 버리므로 반드시 여기에 건다.
+ */
+html {
+  overflow-x: clip;
+}
+
+:root {
+  /* 침엽수림의 밤. 순수한 검정 대신 녹청을 깔아 텐트 안에서 밖을 보는 톤으로 맞춘다. */
+  color-scheme: dark;
+
+  --camp-bg: #0e1815;
+  --camp-surface: #16241f;
+  --camp-surface-2: #1d2f28;
+  --camp-line: #2a3f37;
+  --camp-line-soft: #223229;
+
+  --camp-text: #eaf0ec;
+  --camp-muted: #8ba095;
+  --camp-faint: #5f7269;
+
+  /* 온도에 따라 갈리는 두 축: 모닥불(따뜻함)과 새벽(한기) */
+  --camp-ember: #f0873e;
+  --camp-ember-dim: #7d4322;
+  --camp-dawn: #6fb3c7;
+  --camp-dawn-dim: #2c515c;
+
+  --camp-star: #f2e3c0;
+  --camp-warn: #e3b341;
+  --camp-danger: #d9634b;
+
+  /*
+   * 반투명하게 쓰는 색은 삼원색만 담아둔다. rgba(var(--camp-ink-rgb), 0.4) 처럼 쓴다.
+   * 같은 색을 여러 투명도로 쓰는 자리가 많아서, 값을 한 군데 모아 두고 알파만 그때그때 준다.
+   * ink   글자 색. 옅은 판이나 구분선에도 같은 색을 깐다.
+   * shade 사진과 영상 위에 덮어 글자를 읽히게 만드는 막.
+   */
+  --camp-ink-rgb: 234, 240, 236;
+  --camp-shade-rgb: 8, 15, 13;
+  --camp-ember-rgb: 240, 135, 62;
+
+  /* 주황 버튼 위에 올라가는 글자 */
+  --camp-on-ember: #241209;
+
+  --camp-map-bg: #0d1512;
+  /* 야영장 사진은 톤이 제각각이라 한 번 눌러서 화면에 섞는다 */
+  --camp-photo-filter: saturate(0.62) brightness(0.62) contrast(1.06);
+
+  --camp-glow-1: #27453a;
+  --camp-glow-2: #22383d;
+
+  /*
+   * ── 눈금 ─────────────────────────────────────────────────────
+   * 여백과 글자 크기를 눈대중으로 정하면 화면마다 조금씩 어긋난다.
+   * (정리 전: 글자 크기 37종, 여백 47종)
+   * 여기 있는 값만 쓴다. 새 값이 필요하면 눈금을 늘리지 말고 가까운 칸을 고른다.
+   */
+
+  /* 여백. 4px 격자 위에 올린다. */
+  --sp-0: 0.125rem; /*  2px  글자 사이 미세 조정 */
+  --sp-1: 0.25rem; /*  4px  붙은 요소 사이 */
+  --sp-2: 0.5rem; /*  8px  같은 묶음 안 */
+  --sp-3: 0.75rem; /* 12px */
+  --sp-4: 1rem; /* 16px  기본 안쪽 여백 */
+  --sp-5: 1.5rem; /* 24px  판 안쪽 여백 */
+  --sp-6: 2rem; /* 32px  묶음 사이 */
+  --sp-7: 3rem; /* 48px  절 사이 */
+  --sp-8: 4.5rem; /* 72px  화면 위아래 */
+
+  /*
+   * 글자. 역할로 이름을 붙인다. 크기가 아니라 쓰임이 정해져야 흔들리지 않는다.
+   * 어두운 사진 위에 얹히는 화면이라 본문을 크게 벌리지 않고, 큰 글자는 표제에만 쓴다.
+   */
+  --fs-micro: 0.66rem; /* 눈썹 글자, 표 머리, 범례 */
+  --fs-small: 0.75rem; /* 메타, 태그, 날짜 */
+  --fs-meta: 0.82rem; /* 보조 설명 */
+  --fs-body: 0.9rem; /* 본문 */
+  --fs-lead: 1rem; /* 카드 제목, 이끄는 문장 */
+  --fs-title: 1.25rem; /* 절 제목 */
+  --fs-display: 1.65rem; /* 화면 제목 */
+  --fs-hero: 2.1rem; /* 표지 */
+
+  /*
+   * 글줄 길이. 판이 넓어져도 읽는 글은 이보다 길어지면 안 된다.
+   * 한 줄이 길면 눈이 다음 줄 앞을 못 찾는다.
+   */
+  --measure: 60ch;
+
+  /* 움직임. 빠른 것은 상태, 느린 것은 등장. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-1: 0.16s; /* 색·테두리 같은 상태 변화 */
+  --dur-2: 0.32s; /* 열리고 닫히는 것 */
+  --dur-3: 0.7s; /* 화면에 들어오며 떠오르는 것 */
+
+  --camp-radius-sm: 9px;
+
+  --font-body:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-data: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  background: var(--camp-bg);
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 520px at 78% -8%, var(--camp-glow-1) 0%, transparent 62%),
+    radial-gradient(760px 400px at 8% 4%, var(--camp-glow-2) 0%, transparent 55%), var(--camp-bg);
+  color: var(--camp-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 620px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+/* 계측값은 등폭으로. 자릿수가 흔들리지 않게 tabular-nums 를 쓴다. */
+.num {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* 섹션 위에 붙는 작은 라벨 */
+.eyebrow {
+  font-family: var(--font-data);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  color: var(--camp-faint);
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+:focus-visible {
+  outline: 2px solid var(--camp-ember);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/*
+ * ── 등장 ─────────────────────────────────────────────────────
+ * 격자에 깔리는 카드가 한꺼번에 나타나면 화면이 툭 바뀐다.
+ * 앞에서부터 짧게 어긋나며 올라오면 눈이 따라갈 순서가 생긴다.
+ *
+ * 여덟 번째까지만 늦춘다. 그 뒤로는 어차피 화면 밖이고, 늦추면 기다림이 된다.
+ */
+.rise {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: rise var(--dur-3) var(--ease) forwards;
+}
+
+.rise:nth-child(2) {
+  animation-delay: 60ms;
+}
+.rise:nth-child(3) {
+  animation-delay: 120ms;
+}
+.rise:nth-child(4) {
+  animation-delay: 180ms;
+}
+.rise:nth-child(5) {
+  animation-delay: 240ms;
+}
+.rise:nth-child(6) {
+  animation-delay: 300ms;
+}
+.rise:nth-child(7) {
+  animation-delay: 360ms;
+}
+.rise:nth-child(n + 8) {
+  animation-delay: 420ms;
+}
+
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .rise {
+    opacity: 1;
+    transform: none;
   }
 }
