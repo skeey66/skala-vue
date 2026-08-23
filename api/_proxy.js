@@ -31,8 +31,15 @@ export async function proxy(req, res, { base, keyName, keyValue, what }) {
     const body = Buffer.from(await upstream.arrayBuffer())
 
     res.setHeader('content-type', type)
-    // 같은 요청이 몰려도 원본까지 가지 않게 한다
-    res.setHeader('cache-control', 's-maxage=600, stale-while-revalidate=1800')
+    /*
+     * 성공한 응답만 담아 둔다. 같은 요청이 몰려도 원본까지 가지 않게.
+     *
+     * 실패까지 담으면 원인이 사라진 뒤에도 한동안 실패가 되풀이된다.
+     * 고캠핑 일일 한도는 자정에 풀리는데, 초과 응답을 캐시해 두면
+     * 자정이 지나도 캐시가 만료될 때까지 계속 막힌 것처럼 보인다.
+     */
+    const ok = upstream.status >= 200 && upstream.status < 300
+    res.setHeader('cache-control', ok ? 's-maxage=600, stale-while-revalidate=1800' : 'no-store')
     res.status(upstream.status).send(body)
   } catch {
     res.status(502).json({ message: `${what} 서버에 연결하지 못했습니다.` })
