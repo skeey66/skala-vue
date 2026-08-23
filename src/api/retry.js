@@ -47,6 +47,11 @@ function asMessage(error, what) {
   if (status === 401 || status === 403) {
     return new Error(`${what} 인증키를 확인해 주세요.`)
   }
+  // api/ 의 프록시가 무엇이 잘못됐는지 우리말로 담아 보낸 경우
+  const relayed = error.response?.data?.message
+  if (typeof relayed === 'string' && relayed) {
+    return new Error(relayed)
+  }
   if (error.code === 'ECONNABORTED') {
     return new Error('응답이 늦어 끊었습니다. 다시 시도해 주세요.')
   }

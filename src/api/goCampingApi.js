@@ -15,7 +15,6 @@ const gocamping = axios.create({
   baseURL: '/api/gocamping',
   timeout: 10000,
   params: {
-    serviceKey: import.meta.env.VITE_GOCAMPING_API_KEY,
     MobileOS: 'ETC',
     MobileApp: 'skala-camp',
     _type: 'json',
@@ -25,7 +24,7 @@ const gocamping = axios.create({
 attachRetry(gocamping, '야영장')
 
 export function hasGoCampingKey() {
-  return Boolean(import.meta.env.VITE_GOCAMPING_API_KEY)
+  return __HAS_GOCAMPING_KEY__
 }
 
 /*

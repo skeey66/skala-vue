@@ -73,7 +73,6 @@ const LAYERS = {
   wind_new: { label: '바람', id: 'wind_new' },
 }
 const overlay = ref('none')
-const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY
 
 // 시도 코드 → 지역 데이터
 const byCode = computed(() => {
@@ -142,11 +141,11 @@ function drawOverlay() {
   weatherLayer?.remove()
   weatherLayer = null
   const layer = LAYERS[overlay.value]
-  if (!layer?.id || !apiKey) return
-  weatherLayer = L.tileLayer(
-    `https://tile.openweathermap.org/map/${layer.id}/{z}/{x}/{y}.png?appid=${apiKey}`,
-    { opacity: 0.5, maxZoom: 12 },
-  ).addTo(map)
+  if (!layer?.id) return
+  weatherLayer = L.tileLayer(`/api/owmtile/${layer.id}/{z}/{x}/{y}.png`, {
+    opacity: 0.5,
+    maxZoom: 12,
+  }).addTo(map)
 }
 
 onMounted(() => {

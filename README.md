@@ -27,8 +27,12 @@ npm run dev
 
 키는 두 개가 필요합니다.
 
-- `VITE_OPENWEATHER_API_KEY` — openweathermap.org 에서 발급
-- `VITE_GOCAMPING_API_KEY` — data.go.kr 고캠핑. 일반 인증키의 Decoding 값을 씁니다
+- `OPENWEATHER_API_KEY` — openweathermap.org 에서 발급
+- `GOCAMPING_API_KEY` — data.go.kr 고캠핑. 일반 인증키의 Decoding 값을 씁니다
+
+`VITE_` 접두사를 붙이지 않는 것이 중요합니다. 붙이면 빌드할 때 브라우저 번들 안에
+값이 그대로 박혀 개발자 도구에서 보입니다. 접두사 없이 두면 브라우저는 키를 모르고,
+개발 중에는 Vite 프록시가, 배포된 뒤에는 `api/` 의 서버리스 함수가 대신 붙입니다.
 
 ## Hands on 1 — Project Scaffolding
 
@@ -438,8 +442,8 @@ Naive UI 는 동작이 필요한 곳에만 쓰고, 화면의 얼굴이 되는 �
    oxlint 는 Rust 로 만들어 훨씬 빠릅니다
 2. Prettier 로 들여쓰기와 따옴표, 줄바꿈을 맞췄습니다. `@vue/eslint-config-prettier` 가
    두 도구의 규칙 충돌을 막아 줍니다
-3. API 키를 `.env` 로 옮기고 `VITE_` 접두사를 붙여 클라이언트 번들에 들어가게 했습니다.
-   `.env` 는 `.gitignore` 에 넣고 `.env.example` 에 자리만 남겼습니다
+3. API 키를 `.env` 로 옮겼습니다. `.env` 는 `.gitignore` 에 넣고 `.env.example` 에
+   자리만 남겼습니다
 4. `vite build` 로 `dist/` 정적 파일을 만들고, 지연 로딩한 화면이 별도 청크로 떨어지는지 확인했습니다
 
 ### 최종 서비스 적용 여부
@@ -451,25 +455,36 @@ Naive UI 는 동작이 필요한 곳에만 쓰고, 화면의 얼굴이 되는 �
 빌드하면 화면별 청크로 쪼개집니다. 가장 큰 것이 지도를 쓰는 `RegionsView`(gzip 56KB)와
 Leaflet 을 함께 쓰는 `DistrictPanel`(gzip 52KB)입니다.
 
-정적 호스팅에는 아직 올리지 않았습니다. 다만 올릴 준비로 `vercel.json` 을 만들어 뒀습니다.
-두 가지가 필요해서입니다.
+정적 호스팅에는 아직 올리지 않았지만, 올릴 준비로 두 가지를 해 뒀습니다.
 
-1. 고캠핑 호출이 지나는 `/api/gocamping` 프록시는 `vite.config.js` 에 있어서 `npm run dev`
-   에서만 삽니다. 빌드한 정적 파일만 올리면 이 경로를 받아 줄 곳이 없어 야영장 기능이 죽습니다.
-   같은 경로를 실제 주소로 넘겨주는 rewrite 를 넣었습니다
-2. `createWebHistory` 라서 `/camps` 로 바로 들어오거나 새로고침하면 서버가 그 경로의 파일을
-   찾다가 404 를 냅니다. 모든 경로를 `index.html` 로 보내는 SPA fallback 을 넣었습니다
+먼저 `api/` 아래에 서버리스 함수 세 개를 뒀습니다. 브라우저는 `/api/owm/...`,
+`/api/gocamping/...`, `/api/owmtile/...` 이라는 같은 출처 주소만 알고, 인증키는
+서버 환경변수에만 있습니다. 함수가 요청을 받아 키를 붙여 원본 API 로 넘기고 응답을 돌려줍니다.
 
-날씨 API 두 곳은 CORS 를 열어 주므로 그대로 동작합니다.
+이렇게 한 이유는 두 가지입니다.
+
+1. 저장소가 공개라 키가 새면 안 됩니다. `VITE_` 접두사를 붙이면 값이 번들에 박혀서
+   저장소가 아니라 배포된 사이트의 개발자 도구로 보입니다. 프런트만으로는 이걸 막을 수 없고
+   서버를 한 겹 두는 수밖에 없습니다
+2. 공공데이터포털은 CORS 헤더를 주지 않아 브라우저에서 직접 못 부릅니다.
+   같은 함수가 이 문제도 함께 해결합니다
+
+그리고 `vercel.json` 에 SPA fallback 을 넣었습니다. `createWebHistory` 라서 `/camps` 로
+바로 들어오거나 새로고침하면 서버가 그 경로의 파일을 찾다가 404 를 냅니다.
+`/api` 로 시작하지 않는 모든 경로를 `index.html` 로 보냅니다.
+
+키가 필요 없는 Open-Meteo 와 날씨 아이콘 이미지는 브라우저가 직접 부릅니다.
 
 ### 개인 추가·변경 내용
 
-1. `vercel.json` 작성: 프록시 rewrite 와 SPA fallback. 위에 적은 두 가지를 넣었습니다
-2. `index.html` 정리: 스캐폴딩 기본값이라 탭 제목이 "Vite App" 이었습니다.
+1. 인증키를 브라우저에서 걷어냈습니다: `api/` 서버리스 함수 세 개와 그에 맞춘 개발 서버
+   프록시. 빌드 산출물과 네트워크 요청 어디에도 키가 남지 않는 것을 확인했습니다
+2. `vercel.json` 작성: SPA fallback
+3. `index.html` 정리: 스캐폴딩 기본값이라 탭 제목이 "Vite App" 이었습니다.
    `lang="ko"`, 제목, description 을 채웠습니다
-3. 안 쓰는 코드 정리: 아무 데서도 부르지 않는 함수와 스토어 액션, 어느 template 에도 없는
+4. 안 쓰는 코드 정리: 아무 데서도 부르지 않는 함수와 스토어 액션, 어느 template 에도 없는
    CSS 클래스와 토큰을 걷어냈습니다. 파일 안에서만 쓰는 함수는 `export` 를 뗐습니다
-4. 주석 정리: 요구사항 번호를 가리키던 주석을 전부 서비스 기준으로 다시 썼습니다.
+5. 주석 정리: 요구사항 번호를 가리키던 주석을 전부 서비스 기준으로 다시 썼습니다.
    "과제5 요구 3" 이 아니라 왜 그렇게 만들었는지가 남아 있어야 나중에 읽힙니다
 
 ### 트러블 슈팅
@@ -481,6 +496,12 @@ Leaflet 을 함께 쓰는 `DistrictPanel`(gzip 52KB)입니다.
 ## 폴더 구조
 
 ```
+api/                                브라우저 대신 서버가 부른다 (인증키는 여기서만 붙는다)
+├─ _proxy.js                        공통 프록시
+├─ owm/[...path].js                 OpenWeatherMap
+├─ owmtile/[...path].js             OpenWeatherMap 지도 타일
+└─ gocamping/[...path].js           고캠핑
+
 src/
 ├─ main.js                        Pinia + Router 주입
 ├─ App.vue                        배경 + 내비게이션 바 + <RouterView /> + 푸터

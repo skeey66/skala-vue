@@ -1,11 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/api/gocamping/:path*",
-      "destination": "https://apis.data.go.kr/B551011/GoCamping/:path*"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]

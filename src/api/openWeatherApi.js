@@ -11,10 +11,9 @@ import { attachRetry } from './retry'
  *   /geo/1.0/direct   지역 이름으로 좌표 찾기
  */
 const owm = axios.create({
-  baseURL: 'https://api.openweathermap.org/data/2.5',
+  baseURL: '/api/owm/data/2.5',
   timeout: 8000,
   params: {
-    appid: import.meta.env.VITE_OPENWEATHER_API_KEY,
     units: 'metric',
     lang: 'kr',
   },
@@ -23,7 +22,7 @@ const owm = axios.create({
 attachRetry(owm, '날씨')
 
 export function hasOpenWeatherKey() {
-  return Boolean(import.meta.env.VITE_OPENWEATHER_API_KEY)
+  return __HAS_OWM_KEY__
 }
 
 // 현재 날씨
@@ -136,9 +135,8 @@ export async function fetchNightlyOutlook({ lat, lon }) {
  * 목록에 없는 지역을 검색했을 때 여기서 찾아 추가한다. 한글 이름도 받는다.
  */
 const geo = axios.create({
-  baseURL: 'https://api.openweathermap.org/geo/1.0',
+  baseURL: '/api/owm/geo/1.0',
   timeout: 8000,
-  params: { appid: import.meta.env.VITE_OPENWEATHER_API_KEY },
 })
 
 attachRetry(geo, '지역 검색')
