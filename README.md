@@ -455,7 +455,9 @@ Naive UI 는 동작이 필요한 곳에만 쓰고, 화면의 얼굴이 되는 �
 빌드하면 화면별 청크로 쪼개집니다. 가장 큰 것이 지도를 쓰는 `RegionsView`(gzip 56KB)와
 Leaflet 을 함께 쓰는 `DistrictPanel`(gzip 52KB)입니다.
 
-정적 호스팅에는 아직 올리지 않았지만, 올릴 준비로 두 가지를 해 뒀습니다.
+Vercel 에 올렸습니다. https://skala-vue-skeey66.vercel.app
+
+배포하면서 두 가지를 했습니다.
 
 먼저 `api/` 아래에 서버리스 함수 세 개를 뒀습니다. 브라우저는 `/api/owm/...`,
 `/api/gocamping/...`, `/api/owmtile/...` 이라는 같은 출처 주소만 알고, 인증키는
@@ -469,8 +471,9 @@ Leaflet 을 함께 쓰는 `DistrictPanel`(gzip 52KB)입니다.
 2. 공공데이터포털은 CORS 헤더를 주지 않아 브라우저에서 직접 못 부릅니다.
    같은 함수가 이 문제도 함께 해결합니다
 
-그리고 `vercel.json` 에 SPA fallback 을 넣었습니다. `createWebHistory` 라서 `/camps` 로
-바로 들어오거나 새로고침하면 서버가 그 경로의 파일을 찾다가 404 를 냅니다.
+그리고 `vercel.json` 에 rewrite 두 종류를 넣었습니다. 하나는 원본 경로를 함수에 넘기는 것이고,
+다른 하나는 SPA fallback 입니다. `createWebHistory` 라서 `/camps` 로 바로 들어오거나
+새로고침하면 서버가 그 경로의 파일을 찾다가 404 를 냅니다.
 `/api` 로 시작하지 않는 모든 경로를 `index.html` 로 보냅니다.
 
 키가 필요 없는 Open-Meteo 와 날씨 아이콘 이미지는 브라우저가 직접 부릅니다.
@@ -479,7 +482,7 @@ Leaflet 을 함께 쓰는 `DistrictPanel`(gzip 52KB)입니다.
 
 1. 인증키를 브라우저에서 걷어냈습니다: `api/` 서버리스 함수 세 개와 그에 맞춘 개발 서버
    프록시. 빌드 산출물과 네트워크 요청 어디에도 키가 남지 않는 것을 확인했습니다
-2. `vercel.json` 작성: SPA fallback
+2. `vercel.json` 작성: 함수로 경로를 넘기는 rewrite 와 SPA fallback
 3. `index.html` 정리: 스캐폴딩 기본값이라 탭 제목이 "Vite App" 이었습니다.
    `lang="ko"`, 제목, description 을 채웠습니다
 4. 안 쓰는 코드 정리: 아무 데서도 부르지 않는 함수와 스토어 액션, 어느 template 에도 없는
@@ -489,18 +492,26 @@ Leaflet 을 함께 쓰는 `DistrictPanel`(gzip 52KB)입니다.
 
 ### 트러블 슈팅
 
-`.env` 를 확인하려고 셸에서 `set -a; . ./.env` 로 읽었다가 PATH 가 날아가 `curl` 과 `head` 가
-사라졌습니다. `.env` 안에 셸이 해석할 수 있는 값이 들어 있으면 환경이 통째로 덮어써집니다.
-그 뒤로는 필요한 줄만 `grep` 으로 꺼내 씁니다.
+1. 배포하고 나니 야영장과 날씨가 전부 안 나왔습니다. 함수를 `api/owm/[...path].js` 처럼
+   캐치올 이름으로 뒀는데, Vercel 이 이걸 한 칸짜리 동적 경로로만 잡습니다.
+   `/api/gocamping/basedList` 는 되고 `/api/owm/data/2.5/weather` 는 404 였습니다.
+   함수를 `api/owm.js` 처럼 평평하게 두고, 원본 경로는 `vercel.json` 의 rewrite 가
+   `?path=` 로 실어 보내게 바꿨습니다
+2. 고치고 다시 배포했는데도 고캠핑만 계속 옛 오류가 떴습니다. 응답에 걸어 둔
+   `s-maxage=600` 때문에 CDN 이 이전 배포의 실패 응답을 물고 있던 것이었습니다.
+   잠시 뒤 다시 부르니 정상이었습니다
+3. `.env` 를 확인하려고 셸에서 `set -a; . ./.env` 로 읽었다가 PATH 가 날아가 `curl` 과 `head` 가
+   사라졌습니다. `.env` 안에 셸이 해석할 수 있는 값이 들어 있으면 환경이 통째로 덮어써집니다.
+   그 뒤로는 필요한 줄만 `grep` 으로 꺼내 씁니다.
 
 ## 폴더 구조
 
 ```
 api/                                브라우저 대신 서버가 부른다 (인증키는 여기서만 붙는다)
 ├─ _proxy.js                        공통 프록시
-├─ owm/[...path].js                 OpenWeatherMap
-├─ owmtile/[...path].js             OpenWeatherMap 지도 타일
-└─ gocamping/[...path].js           고캠핑
+├─ owm.js                           OpenWeatherMap
+├─ owmtile.js                       OpenWeatherMap 지도 타일
+└─ gocamping.js                     고캠핑
 
 src/
 ├─ main.js                        Pinia + Router 주입
