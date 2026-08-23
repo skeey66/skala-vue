@@ -1,4 +1,4 @@
-import { proxy } from '../_proxy.js'
+import { proxy } from './_proxy.js'
 
 // 공공데이터포털은 CORS 헤더를 주지 않아 브라우저에서 직접 못 부른다.
 // 키를 감추는 것과 CORS 우회를 이 함수가 함께 해결한다.

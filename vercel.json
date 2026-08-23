@@ -1,8 +1,8 @@
 {
   "rewrites": [
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/owm/:path*", "destination": "/api/owm?path=:path*" },
+    { "source": "/api/owmtile/:path*", "destination": "/api/owmtile?path=:path*" },
+    { "source": "/api/gocamping/:path*", "destination": "/api/gocamping?path=:path*" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

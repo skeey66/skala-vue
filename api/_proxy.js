@@ -4,6 +4,9 @@
  * 키를 클라이언트 번들에 넣으면 개발자 도구에서 그대로 보인다.
  * 저장소가 공개라 더 그렇다. 그래서 키는 Vercel 환경변수에만 두고
  * (VITE_ 접두사를 붙이지 않아야 번들에 안 들어간다) 여기서 붙인다.
+ *
+ * 원본 경로는 vercel.json 의 rewrite 가 ?path= 로 실어 보낸다.
+ * 폴더 이름에 [...] 를 쓰는 캐치올은 한 칸짜리 경로만 잡혀서 쓰지 않는다.
  */
 export async function proxy(req, res, { base, keyName, keyValue, what }) {
   if (!keyValue) {
@@ -11,8 +14,8 @@ export async function proxy(req, res, { base, keyName, keyValue, what }) {
     return
   }
 
-  const segments = [].concat(req.query.path ?? [])
-  const url = new URL(`${base}/${segments.join('/')}`)
+  const path = [].concat(req.query.path ?? []).join('/')
+  const url = new URL(`${base}/${path}`)
 
   for (const [name, value] of Object.entries(req.query)) {
     if (name === 'path') continue

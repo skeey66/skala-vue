@@ -1,4 +1,4 @@
-import { proxy } from '../_proxy.js'
+import { proxy } from './_proxy.js'
 
 // /api/owm/data/2.5/weather → api.openweathermap.org/data/2.5/weather
 // /api/owm/geo/1.0/direct   → api.openweathermap.org/geo/1.0/direct
